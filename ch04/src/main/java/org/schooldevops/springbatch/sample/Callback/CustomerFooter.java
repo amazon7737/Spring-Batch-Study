@@ -1,4 +1,4 @@
-package org.schooldevops.springbatch.sample.footer;
+package org.schooldevops.springbatch.sample.Callback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.file.FlatFileFooterCallback;

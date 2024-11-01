@@ -1,18 +1,13 @@
 package org.schooldevops.springbatch.sample.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.schooldevops.springbatch.sample.aggregator.CustomerLineAggregator;
 import org.schooldevops.springbatch.sample.domain.Customer;
-import org.schooldevops.springbatch.sample.footer.CustomerFooter;
-import org.schooldevops.springbatch.sample.header.CustomerHeader;
-import org.schooldevops.springbatch.sample.processor.AggregateCustomerProcessor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -22,8 +17,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Configuration
