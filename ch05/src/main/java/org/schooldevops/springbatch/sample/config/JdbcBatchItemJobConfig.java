@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 @Configuration
 public class JdbcBatchItemJobConfig {
 
-    public static final int CHUNK_SIZE = 2;
+    public static final int CHUNK_SIZE = 100;
     public static final String ENCODING = "UTF-8";
     public static final String JDBC_BATCH_WRITER_CHUNK_JOB = "JDBC_BATCH_WRITER_CHUNK_JOB";
 
