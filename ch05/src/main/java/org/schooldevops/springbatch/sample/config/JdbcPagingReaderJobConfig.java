@@ -57,8 +57,8 @@ public class JdbcPagingReaderJobConfig {
     public PagingQueryProvider queryProvider() throws Exception {
         SqlPagingQueryProviderFactoryBean queryProvider = new SqlPagingQueryProviderFactoryBean();
         queryProvider.setDataSource(dataSource); // DB에 맞는 PagingQueryProvider를 선택하기 위함
-        queryProvider.setSelectClause("name, age, gender");
-        queryProvider.setFromClause("from testdb.customer2");
+        queryProvider.setSelectClause("id, name, age, gender");
+        queryProvider.setFromClause("from customer2");
         queryProvider.setWhereClause("where age >= :age");
 
         Map<String, Order> sortKeys = new HashMap<>(1);
