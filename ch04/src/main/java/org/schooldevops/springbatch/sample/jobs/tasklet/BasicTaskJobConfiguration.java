@@ -1,7 +1,6 @@
-package org.schooldevops.springbatch.sample.config;
+package org.schooldevops.springbatch.sample.jobs.tasklet;
 
 import lombok.extern.slf4j.Slf4j;
-import org.schooldevops.springbatch.sample.GreetingTask;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;

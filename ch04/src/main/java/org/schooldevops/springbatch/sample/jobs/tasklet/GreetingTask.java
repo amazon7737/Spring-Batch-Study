@@ -1,4 +1,4 @@
-package org.schooldevops.springbatch.sample;
+package org.schooldevops.springbatch.sample.jobs.tasklet;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;

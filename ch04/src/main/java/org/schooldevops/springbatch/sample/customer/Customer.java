@@ -1,4 +1,4 @@
-package org.schooldevops.springbatch.sample.domain;
+package org.schooldevops.springbatch.sample.customer;
 import lombok.Data;
 
 @Data

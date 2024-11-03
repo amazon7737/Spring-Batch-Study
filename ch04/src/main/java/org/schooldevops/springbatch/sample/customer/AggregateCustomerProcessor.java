@@ -1,7 +1,6 @@
-package org.schooldevops.springbatch.sample.processor;
+package org.schooldevops.springbatch.sample.customer;
 
 import lombok.extern.slf4j.Slf4j;
-import org.schooldevops.springbatch.sample.domain.Customer;
 import org.springframework.batch.item.ItemProcessor;
 
 import java.util.concurrent.ConcurrentHashMap;

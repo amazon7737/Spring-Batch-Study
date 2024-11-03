@@ -1,7 +1,7 @@
-package org.schooldevops.springbatch.sample.config;
+package org.schooldevops.springbatch.sample.jobs.chunk;
 
 import lombok.extern.slf4j.Slf4j;
-import org.schooldevops.springbatch.sample.domain.CompositeIndex;
+import org.schooldevops.springbatch.sample.customer.Customer;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -20,55 +20,56 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Slf4j
 @Configuration
-public class CompositeIndexJobConfig {
+public class FlatFileItemJobConfig {
 
     public static final int CHUNK_SIZE = 100;
-    public static final String ENCODING = "EUC-KR";
+    public static final String ENCODING = "UTF-8";
     public static final String FLAT_FILE_CHUNK_JOB = "FLAT_FILE_CHUNK_JOB";
 
+//    private ConcurrentHashMap<String, Integer> aggregateInfos = new ConcurrentHashMap<>();
+//    private final ItemProcessor<Customer, Customer> itemProcessor = new AggregateCustomerProcessor(aggregateInfos);
+
     @Bean
-    public FlatFileItemReader<CompositeIndex> flatFileItemReader(){
-        return new FlatFileItemReaderBuilder<CompositeIndex>()
+    public FlatFileItemReader<Customer> flatFileItemReader() {
+        return new FlatFileItemReaderBuilder<Customer>()
                 .name("FlatFileItemReader")
-                .resource(new ClassPathResource("./경기종합지수_2020100__구성지표_시계열__10차__20241022145538.csv"))
+                .resource(new ClassPathResource("./customer.csv"))
                 .encoding(ENCODING)
                 .delimited().delimiter(",")
-                .names("index", "number")
-                .targetType(CompositeIndex.class)
+                .names("name", "age", "gender")
+                .targetType(Customer.class)
                 .build();
     }
 
     @Bean
-    public FlatFileItemWriter<CompositeIndex> flatFileItemWriter(){
-        return new FlatFileItemWriterBuilder<CompositeIndex>()
+    public FlatFileItemWriter<Customer> flatFileItemWriter() {
+        return new FlatFileItemWriterBuilder<Customer>()
                 .name("flatFileItemWriter")
-                .resource(new FileSystemResource("./output/result.csv"))
+                .resource(new FileSystemResource("./output/customer_new.csv")) // 여기 파일이 유기적으로 변동될 수는 없을까?
                 .encoding(ENCODING)
                 .delimited().delimiter("\t")
-                .names("", "")
+                .names("name", "age", "gender")
                 .build();
     }
 
     @Bean
-    public Step flatFileStep(JobRepository jobRepository, PlatformTransactionManager transactionManager){
-        log.info("-------------- Init flatFileStep ----------------");
+    public Step flatFileStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+        log.info("------------- Init flatFileStep --------------");
 
         return new StepBuilder("flatFileStep", jobRepository)
-                .<CompositeIndex, CompositeIndex>chunk(CHUNK_SIZE, transactionManager)
+                .<Customer, Customer>chunk(CHUNK_SIZE, transactionManager)
                 .reader(flatFileItemReader())
                 .writer(flatFileItemWriter())
                 .build();
     }
 
     @Bean
-    public Job flatFileJob(Step flatFileStep, JobRepository jobRepository){
-        log.info("------------ Init flatFileJob ---------------");
+    public Job flatFileJob(Step flatFileStep, JobRepository jobRepository) {
+        log.info("------------ Init flatFileJob ------------");
 
         return new JobBuilder(FLAT_FILE_CHUNK_JOB, jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(flatFileStep)
                 .build();
     }
-
-
 }
