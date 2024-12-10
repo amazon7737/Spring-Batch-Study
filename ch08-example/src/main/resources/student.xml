@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.schooldevops.springbatch.sample.jobs">
+
+    <resultMap id="studentResult" type="org.schooldevops.springbatch.sample.domain.Student">
+        <result property="studentId" column="studentId"/>
+        <result property="name" column="name"/>
+        <result property="department" column="department"/>
+    </resultMap>
+
+    <select id="selectStudents" resultMap="studentResult">
+        SELECT id, name, age, gender
+        FROM student
+        LIMIT #{_skiprows}, #{_pagesize}
+    </select>
+
+<!--    <insert id="insertStudents" parameterType="org.schooldevops.springbatch.sample.domain.Student">-->
+<!--        INSERT INTO student(name, age, gender) VALUES (#{name}, #{age}, #{gender});-->
+<!--    </insert>-->
+</mapper>

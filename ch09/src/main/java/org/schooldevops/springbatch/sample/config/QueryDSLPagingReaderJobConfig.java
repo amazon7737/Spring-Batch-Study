@@ -2,17 +2,15 @@ package org.schooldevops.springbatch.sample.config;
 
 import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
-import netscape.javascript.JSObject;
 import org.schooldevops.springbatch.sample.domain.Customer;
 import org.schooldevops.springbatch.sample.jobs.CustomerItemProcessor;
+import org.schooldevops.springbatch.sample.jobs.QuerydslPagingItemReader;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.database.JpaPagingItemReader;
-import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,16 +19,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import org.schooldevops.springbatch.sample.domain.QCustomer;
+import static org.schooldevops.springbatch.sample.domain.QCustomer.customer;
+
 import javax.sql.DataSource;
-import java.util.Collections;
 
 @Slf4j
 @Configuration
-public class JpaPagingReaderJobConfig {
-
+public class QueryDSLPagingReaderJobConfig {
     public static final int CHUNK_SIZE = 2;
     public static final String ENCODING = "UTF-8";
-    public static final String JPA_PAGING_CHUNK_JOB = "JPA_PAGING_CHUNK_JOB";
+    public static final String QUERYDSL_PAGING_CHUNK_JOB = "QUERYDSL_PAGING_CHUNK_JOB";
 
     @Autowired
     DataSource dataSource;
@@ -39,20 +38,18 @@ public class JpaPagingReaderJobConfig {
     EntityManagerFactory entityManagerFactory;
 
     @Bean
-    public JpaPagingItemReader<Customer> customerJpaPagingItemReader() throws Exception {
-        return new JpaPagingItemReaderBuilder<Customer>()
-                .name("customerJpaPagingItemReader")
-                .queryString("SELECT c FROM Customer c WHERE c.age > :age order by id desc")
-                .pageSize(CHUNK_SIZE)
+    public QuerydslPagingItemReader<Customer> customerjQuerydslPagingItemReader() {
+        return new QuerydslPagingItemReaderBuilder<Customer>()
+                .name("customerQuerydslPagingItemReader")
                 .entityManagerFactory(entityManagerFactory)
-                .parameterValues(Collections.singletonMap("age", 20))
+                .chunkSize(2)
+                .querySupplier(jpaQueryFactory -> jpaQueryFactory.select(QCustomer.customer).from(QCustomer.customer).where(QCustomer.customer.age.gt(20)))
                 .build();
     }
-
     @Bean
-    public FlatFileItemWriter<Customer> customerJpaFlatFileItemWriter() {
+    public FlatFileItemWriter<Customer> customerQuerydslFlatFileItemWriter() {
         return new FlatFileItemWriterBuilder<Customer>()
-                .name("customerJpaFlatFileItemWriter")
+                .name("customerQuerydslFlatFileItemWriter")
                 .resource(new FileSystemResource("./output/customer_new_v2.csv"))
                 .encoding(ENCODING)
                 .delimited().delimiter("\t")
@@ -61,23 +58,24 @@ public class JpaPagingReaderJobConfig {
     }
 
     @Bean
-    public Step customerJpaPagingStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) throws Exception {
-        log.info("--------------- Init customerJpaPagingStep -------------");
-
+    public Step customerQuerydslPagingStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) throws Exception {
+        log.info("------------ Init customerQuerydslPagingStep -------------");
         return new StepBuilder("customerJpaPagingStep", jobRepository)
                 .<Customer, Customer>chunk(CHUNK_SIZE, transactionManager)
-                .reader(customerJpaPagingItemReader())
+                .reader(customerjQuerydslPagingItemReader())
                 .processor(new CustomerItemProcessor())
-                .writer(customerJpaFlatFileItemWriter())
+                .writer(customerQuerydslFlatFileItemWriter())
                 .build();
     }
 
     @Bean
     public Job customerJpaPagingJob(Step customerJdbcPagingStep, JobRepository jobRepository) {
-        log.info("-------------- Init customerJpaPagingJob --------------");
-        return new JobBuilder(JPA_PAGING_CHUNK_JOB, jobRepository)
+        log.info("------------ Init customerJpaPagingJob -------------");
+        return new JobBuilder(QUERYDSL_PAGING_CHUNK_JOB, jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(customerJdbcPagingStep)
                 .build();
     }
+
+
 }
